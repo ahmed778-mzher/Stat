@@ -23,7 +23,6 @@
             --secondary-color: #10b981;
             --accent-color: #f59e0b;
         }
-        
         html.dark {
             color-scheme: dark;
         }
@@ -180,6 +179,44 @@
 
         <!-- المحتوى الرئيسي -->
         <main class="flex-grow py-8">
+            <!-- فلتر المرحلة -->
+            <section class="mb-8">
+                <div class="flex flex-wrap gap-3 justify-center md:justify-start items-center">
+                    <label class="font-medium text-gray-700 dark:text-gray-300">تصفية حسب المرحلة:</label>
+                    <button type="button" class="stage-filter-btn bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-3 py-1 rounded-full font-semibold transition hover:bg-blue-200 dark:hover:bg-blue-800"
+                        data-stage="">الكل</button>
+                    <button type="button" class="stage-filter-btn bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1 rounded-full font-semibold transition hover:bg-blue-200 dark:hover:bg-blue-800"
+                        data-stage="1">الأولى</button>
+                    <button type="button" class="stage-filter-btn bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1 rounded-full font-semibold transition hover:bg-blue-200 dark:hover:bg-blue-800"
+                        data-stage="2">الثانية</button>
+                    <button type="button" class="stage-filter-btn bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1 rounded-full font-semibold transition hover:bg-blue-200 dark:hover:bg-blue-800"
+                        data-stage="3">الثالثة</button>
+                    <button type="button" class="stage-filter-btn bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1 rounded-full font-semibold transition hover:bg-blue-200 dark:hover:bg-blue-800"
+                        data-stage="4">الرابعة</button>
+                </div>
+            </section>
+            <script>
+                // إضافة فلتر المرحلة بشكل متكامل مع التطبيق
+                if (!window.stageFilterInitialized) {
+                    window.stageFilterInitialized = true;
+                    document.querySelectorAll('.stage-filter-btn').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            document.querySelectorAll('.stage-filter-btn').forEach(b => {
+                                b.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-200');
+                                b.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-200');
+                            });
+                            this.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-200');
+                            this.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-200');
+                            // حفظ المرحلة المختارة في appState
+                            window.appState = window.appState || {};
+                            window.appState.selectedStage = this.dataset.stage;
+                            if (window.app && typeof window.app.renderSubjects === 'function') {
+                                window.app.renderSubjects();
+                            }
+                        });
+                    });
+                }
+            </script>
             <!-- واجهة الطالب -->
             <div id="student-view">
                 <!-- الإعلانات -->
@@ -255,6 +292,7 @@
                 </div>
             </div>
             
+
             <!-- لوحة التحكم الإدارية -->
             <div id="admin-dashboard-view" class="hidden">
                 <div class="flex flex-col md:flex-row gap-8">
@@ -380,7 +418,70 @@
                                 </div>
                             </div>
                             
-                            <!-- إضافة مادة جديدة -->
+                            <!-- إضافة مقطع فيديو (YouTube) -->
+                            <!-- لم يعد هناك نموذج إضافة فيديو هنا. سيتم إضافة الفيديو من نافذة تفاصيل المادة عبر زر "إضافة ملف جديد" مع اختيار نوع الملف "فيديو". -->
+                            <!-- إذا أردت تخصيص زر منفصل لإضافة فيديو في نافذة تفاصيل المادة، أضف الزر في detailsHeader واجعل نوع الملف في نافذة add-file-modal يُضبط تلقائياً على "video" عند الضغط عليه. -->
+                            <script>
+                                // إضافة زر "إضافة فيديو" في تفاصيل المادة (detailsHeader) إذا كان المستخدم أدمن
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    if (!window.app) return;
+                                    // تعديل showSubjectDetails لإضافة زر "إضافة فيديو"
+                                    const origShowSubjectDetails = window.app.showSubjectDetails;
+                                    window.app.showSubjectDetails = function(subjectId) {
+                                        origShowSubjectDetails.call(this, subjectId);
+                                        // أضف زر "إضافة فيديو" إذا كان المستخدم أدمن
+                                        const detailsHeader = document.getElementById('subject-details-header');
+                                        if (detailsHeader && window.appState.currentUserRole) {
+                                            // تحقق من عدم تكرار الزر
+                                            if (!detailsHeader.querySelector('#add-video-btn')) {
+                                                const addVideoBtn = document.createElement('button');
+                                                addVideoBtn.id = 'add-video-btn';
+                                                addVideoBtn.type = 'button';
+                                                addVideoBtn.className = 'flex items-center gap-2 bg-gradient-to-l from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all duration-200';
+                                                addVideoBtn.innerHTML = '<i class="fab fa-youtube"></i><span>إضافة فيديو يوتيوب</span>';
+                                                addVideoBtn.onclick = function() {
+                                                    // افتح نافذة إضافة ملف، واضبط نوع الملف على "video"
+                                                    window.app.showAddFileModal(subjectId);
+                                                    setTimeout(function() {
+                                                        const fileTypeSelect = document.getElementById('add-file-type');
+                                                        if (fileTypeSelect) {
+                                                            fileTypeSelect.value = 'video';
+                                                            // اجعل الحقل غير قابل للتغيير أثناء إضافة فيديو
+                                                            fileTypeSelect.disabled = true;
+                                                        }
+                                                        // غيّر label اسم الملف ليكون "عنوان الفيديو"
+                                                        const fileNameLabel = document.querySelector('label[for="add-file-name"]');
+                                                        if (fileNameLabel) fileNameLabel.textContent = 'عنوان الفيديو';
+                                                        // غيّر label رابط الملف ليكون "رابط الفيديو (YouTube)"
+                                                        const fileUrlLabel = document.querySelector('label[for="add-file-url"]');
+                                                        if (fileUrlLabel) fileUrlLabel.textContent = 'رابط الفيديو (YouTube)';
+                                                        // غيّر placeholder
+                                                        const fileUrlInput = document.getElementById('add-file-url');
+                                                        if (fileUrlInput) fileUrlInput.placeholder = 'https://www.youtube.com/watch?v=...';
+                                                    }, 100);
+                                                    // عند إغلاق النافذة، أعد تمكين select
+                                                    const closeBtn = document.getElementById('close-add-file-modal');
+                                                    const cancelBtn = document.getElementById('cancel-add-file');
+                                                    function resetAddFileType() {
+                                                        const fileTypeSelect = document.getElementById('add-file-type');
+                                                        if (fileTypeSelect) fileTypeSelect.disabled = false;
+                                                        // أعد النصوص الافتراضية
+                                                        const fileNameLabel = document.querySelector('label[for="add-file-name"]');
+                                                        if (fileNameLabel) fileNameLabel.textContent = 'اسم الملف';
+                                                        const fileUrlLabel = document.querySelector('label[for="add-file-url"]');
+                                                        if (fileUrlLabel) fileUrlLabel.textContent = 'رابط الملف';
+                                                        const fileUrlInput = document.getElementById('add-file-url');
+                                                        if (fileUrlInput) fileUrlInput.placeholder = 'https://...';
+                                                    }
+                                                    if (closeBtn) closeBtn.onclick = resetAddFileType;
+                                                    if (cancelBtn) cancelBtn.onclick = resetAddFileType;
+                                                };
+                                                detailsHeader.appendChild(addVideoBtn);
+                                            }
+                                        }
+                                    };
+                                });
+                            </script>
                             <div class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                                 <h4 class="text-lg font-semibold mb-4 border-b pb-3 dark:border-gray-700 flex items-center space-x-3 space-x-reverse">
                                     <i class="fas fa-folder-plus text-indigo-500"></i>
@@ -465,11 +566,75 @@
                                     <i class="fas fa-edit text-indigo-500"></i>
                                     <span>إدارة المواد الحالية</span>
                                 </h4>
-                                
                                 <div id="admin-subjects-list" class="space-y-4">
-                                    <!-- سيتم ملؤها ديناميكيًا -->
+                                    <!-- سيتم ملؤها ديناميكيًا عبر السكريبت الرئيسي -->
                                 </div>
                             </div>
+                            <script>
+                                // عرض قائمة المواد في لوحة الإدارة
+                                function renderAdminSubjectsList() {
+                                    const container = document.getElementById('admin-subjects-list');
+                                    if (!container) return;
+                                    container.innerHTML = '';
+                                    if (!window.appState || !window.appState.allSubjects || window.appState.allSubjects.length === 0) {
+                                        container.innerHTML = `
+                                            <div class="text-center py-6 text-gray-500">
+                                                <i class="fas fa-folder-open text-3xl mb-2"></i>
+                                                <p>لا توجد مواد مضافة حالياً</p>
+                                            </div>
+                                        `;
+                                        return;
+                                    }
+                                    window.appState.allSubjects
+                                        .sort((a, b) => a.stage - b.stage || a.course - b.course || a.name.localeCompare(b.name))
+                                        .forEach(subject => {
+                                            const fileCount = subject.files?.length || 0;
+                                            const stageName = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة'][subject.stage - 1] || '';
+                                            const courseName = subject.course === 1 ? 'الأول' : 'الثاني';
+                                            const lastUpdated = subject.lastUpdatedAt && subject.lastUpdatedAt.toDate
+                                                ? subject.lastUpdatedAt.toDate().toLocaleDateString('ar-EG')
+                                                : 'غير محدد';
+                                            const subjectDiv = document.createElement('div');
+                                            subjectDiv.className = "bg-gray-50 dark:bg-gray-700 p-4 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 shadow animate-fadeIn";
+                                            subjectDiv.innerHTML = `
+                                                <div>
+                                                    <div class="font-bold text-lg text-blue-700 dark:text-blue-300">${subject.name}</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-300 mt-1">
+                                                        المرحلة: <span class="font-medium">${stageName}</span> - الكورس: <span class="font-medium">${courseName}</span>
+                                                    </div>
+                                                    ${subject.description ? `<div class="text-xs text-gray-400 mt-1">${subject.description}</div>` : ''}
+                                                    <div class="text-xs text-gray-400 mt-1">
+                                                        عدد الملفات: <span class="font-medium">${fileCount}</span>
+                                                        &nbsp;|&nbsp; آخر تحديث: <span>${lastUpdated}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center subject-folder-link" data-id="${subject.id}">
+                                                        <i class="fas fa-folder-open mr-1"></i> عرض
+                                                    </button>
+                                                    <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded flex items-center" onclick="window.app.confirmDeleteSubject('${subject.id}')">
+                                                        <i class="fas fa-trash-alt mr-1"></i> حذف
+                                                    </button>
+                                                </div>
+                                            `;
+                                            container.appendChild(subjectDiv);
+                                        });
+                                }
+
+                                // مراقبة التحديثات التلقائية
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    if (window.app && window.appState) {
+                                        window.app.renderAdminSubjectsList = renderAdminSubjectsList;
+                                        renderAdminSubjectsList();
+                                        // تحديث القائمة عند تحديث المواد
+                                        const origRenderSubjects = window.app.renderSubjects;
+                                        window.app.renderSubjects = function() {
+                                            origRenderSubjects.apply(window.app, arguments);
+                                            renderAdminSubjectsList();
+                                        };
+                                    }
+                                });
+                            </script>
                         </div>
                         
                         <!-- تبويب إدارة المستخدمين -->
@@ -795,14 +960,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // تكوين Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAl_pb8TJ4jjyef0mFDboNOfXA1n1GtDvA",
-            authDomain: "stat-118ce.firebaseapp.com",
-            projectId: "stat-118ce",
-            storageBucket: "stat-118ce.appspot.com",
-            messagingSenderId: "134267439052",
-            appId: "1:134267439052:web:8e029f779bf564ed09bf69"
-        };
+        function _0x2ad6(){const _0x315dcb=['1180712rJEtyT','4TQSjWs','5410szomYu','42QaAcqL','stat-118ce.firebaseapp.com','773130dMozfT','stat-118ce','590160rlAUAZ','3179491tBmkhQ','10910990QwUMBe','15554077qHCqSt','274GexVOH','18CuGloF','AIzaSyAl_pb8TJ4jjyef0mFDboNOfXA1n1GtDvA'];_0x2ad6=function(){return _0x315dcb;};return _0x2ad6();}const _0x198a5b=_0x5bc5;(function(_0x417089,_0x1721d3){const _0x43d1c1=_0x5bc5,_0x373173=_0x417089();while(!![]){try{const _0x28e641=-parseInt(_0x43d1c1(0x187))/0x1*(parseInt(_0x43d1c1(0x182))/0x2)+parseInt(_0x43d1c1(0x17e))/0x3*(-parseInt(_0x43d1c1(0x186))/0x4)+-parseInt(_0x43d1c1(0x17c))/0x5*(-parseInt(_0x43d1c1(0x188))/0x6)+parseInt(_0x43d1c1(0x17f))/0x7+parseInt(_0x43d1c1(0x185))/0x8*(-parseInt(_0x43d1c1(0x183))/0x9)+-parseInt(_0x43d1c1(0x180))/0xa+parseInt(_0x43d1c1(0x181))/0xb;if(_0x28e641===_0x1721d3)break;else _0x373173['push'](_0x373173['shift']());}catch(_0x340c63){_0x373173['push'](_0x373173['shift']());}}}(_0x2ad6,0x98f03));function _0x5bc5(_0x12e20f,_0x1bc9bc){const _0x2ad668=_0x2ad6();return _0x5bc5=function(_0x5bc556,_0x68d547){_0x5bc556=_0x5bc556-0x17c;let _0x264b88=_0x2ad668[_0x5bc556];return _0x264b88;},_0x5bc5(_0x12e20f,_0x1bc9bc);}const firebaseConfig={'apiKey':_0x198a5b(0x184),'authDomain':_0x198a5b(0x189),'projectId':_0x198a5b(0x17d),'storageBucket':'stat-118ce.appspot.com','messagingSenderId':'134267439052','appId':'1:134267439052:web:8e029f779bf564ed09bf69'};
 
         // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
@@ -837,7 +995,6 @@
         // تهيئة التطبيق
         class StatisticsPlatform {
             constructor() {
-                alert('StatisticsPlatform started!');
 
                 this.initDOMElements();
                 this.initEventListeners();
@@ -983,25 +1140,162 @@
                         this.showSubjectDetails(subjectId);
                     }
                 });
-                DOM.elements.detailsList?.addEventListener('click', (e) => {
-                    const addBtn = e.target.closest('#add-new-file-btn');
-                    const downloadLink = e.target.closest('a[href^="http"]');
-                    const editBtn = e.target.closest('.edit-file-button');
-                    const delFileBtn = e.target.closest('.delete-file-button');
-                    if (addBtn) {
-                        this.showAddFileModal(addBtn.dataset.subjectId);
+
+                // إصلاح event delegation لزر إضافة ملف جديد
+                // تصميم جديد لواجهة تفاصيل الملفات (Material Design-like)
+                if (DOM.elements.detailsList) {
+                    DOM.elements.detailsList.addEventListener('click', (e) => {
+                        const downloadLink = e.target.closest('a[href^="http"]');
+                        const editBtn = e.target.closest('.edit-file-button');
+                        const delFileBtn = e.target.closest('.delete-file-button');
+                        if (downloadLink && downloadLink.dataset.subjectId) {
+                            e.preventDefault();
+                            this.handleFileDownload(downloadLink.dataset.subjectId, downloadLink.href);
+                        }
+                        else if (editBtn) {
+                            this.showEditFileModal(editBtn.dataset.subjectId, editBtn.dataset.fileId);
+                        }
+                        else if (delFileBtn) {
+                            this.confirmDeleteFile(delFileBtn.dataset.subjectId, delFileBtn.dataset.fileId);
+                        }
+                    });
+                }
+
+                // إعادة تصميم تفاصيل المادة والملفات بشكل جذري (Material/Modern)
+                this.showSubjectDetails = function(subjectId) {
+                    const subject = appState.allSubjects.find(s => s.id === subjectId);
+                    if (!subject) {
+                        this.switchView('student');
+                        return;
                     }
-                    else if (downloadLink && downloadLink.dataset.subjectId) {
-                        e.preventDefault();
-                        this.handleFileDownload(downloadLink.dataset.subjectId, downloadLink.href);
+                    appState.currentSubject = subject;
+                    if (DOM.elements.detailsTitle) {
+                        DOM.elements.detailsTitle.innerHTML = `
+                            <span class="inline-flex items-center gap-2 text-3xl font-extrabold text-indigo-700 dark:text-indigo-300">
+                                <i class="fas fa-book-open-reader"></i>
+                                ${subject.name}
+                            </span>
+                        `;
                     }
-                    else if (editBtn) {
-                        this.showEditFileModal(editBtn.dataset.subjectId, editBtn.dataset.fileId);
+                    if (DOM.elements.downloadCount) {
+                        const downloadCount = subject.downloadCount || 0;
+                        DOM.elements.downloadCount.innerHTML = `
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 text-sm font-bold shadow">
+                                <i class="fas fa-download"></i>
+                                ${downloadCount} تحميل
+                            </span>
+                        `;
                     }
-                    else if (delFileBtn) {
-                        this.confirmDeleteFile(delFileBtn.dataset.subjectId, delFileBtn.dataset.fileId);
+                    if (DOM.elements.detailsHeader) {
+                        if (auth.currentUser) {
+                            DOM.elements.detailsHeader.innerHTML = `
+                                <div class="flex flex-wrap gap-4">
+                                    <button type="button"
+                                        id="add-new-file-btn"
+                                        data-subject-id="${subject.id}"
+                                        class="flex items-center gap-2 bg-gradient-to-l from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all duration-200">
+                                        <i class="fas fa-plus"></i>
+                                        <span>إضافة ملف جديد</span>
+                                    </button>
+                                    <button data-subject-id="${subject.id}" id="delete-subject-btn"
+                                            class="flex items-center gap-2 bg-gradient-to-l from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all duration-200">
+                                        <i class="fas fa-trash-alt"></i>
+                                        <span>حذف المادة</span>
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            DOM.elements.detailsHeader.innerHTML = '';
+                        }
                     }
-                });
+                    if (DOM.elements.detailsList) {
+                        DOM.elements.detailsList.innerHTML = '';
+                        if (!subject.files || subject.files.length === 0) {
+                            DOM.elements.detailsList.innerHTML = `
+                                <li class="flex flex-col items-center justify-center py-12 text-gray-400">
+                                    <i class="fas fa-folder-open text-6xl mb-4"></i>
+                                    <p class="text-xl font-semibold">لا توجد ملفات في هذا المجلد</p>
+                                </li>
+                            `;
+                            return;
+                        }
+                        DOM.elements.detailsList.style.color = "#000";
+                        // تصميم شبكي حديث للملفات
+                        const grid = document.createElement('div');
+                        grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6";
+                        subject.files.forEach(file => {
+                            const isVideo = file.fileName?.toLowerCase().includes('youtube') ||
+                                file.fileUrl?.toLowerCase().includes('youtube') ||
+                                file.fileName?.toLowerCase().includes('video') ||
+                                file.fileType === 'video';
+                            const iconClass = this.getFileIcon(file.fileName || '');
+                            const card = document.createElement('div');
+                            card.className = "relative bg-white dark:bg-gray-900 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-800 flex flex-col p-6 group w-auto min-w-[220px] max-w-full";                            card.innerHTML = `
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center text-2xl text-indigo-600 dark:text-indigo-200 shadow">
+                                        <i class="${iconClass} ${isVideo ? 'text-red-500' : 'text-indigo-600 dark:text-indigo-200'}"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-lg text-indigo-800 dark:text-indigo-100 truncate">${file.fileName}</div>
+                                        <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            ${this.formatDate(file.addedAt, true)}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-1"></div>
+                                <div class="flex items-center justify-between mt-4">
+                                    <a href="${file.fileUrl}" target="_blank"
+                                        class="flex items-center gap-2 bg-gradient-to-l from-green-500 to-emerald-400 hover:from-green-600 hover:to-emerald-500 text-white font-bold py-2 px-4 rounded-full shadow transition-all"
+                                        data-subject-id="${subject.id}">
+                                        <i class="fas fa-arrow-down"></i>
+                                        تحميل
+                                    </a>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-50 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-200 text-xs font-semibold shadow">
+                                        ${this.getFileTypeName(file.fileType)}
+                                    </span>
+                                </div>
+                                ${auth.currentUser ? `
+                                <div class="absolute top-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                                    <button data-subject-id="${subject.id}" data-file-id="${file.fileId}"
+                                            class="edit-file-button bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-200 rounded-full p-2 shadow"
+                                            title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" data-subject-id="${subject.id}" data-file-id="${file.fileId}"
+                                            class="delete-file-button bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-200 rounded-full p-2 shadow"
+                                            title="حذف">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                                ` : ''}
+                            `;
+                            grid.appendChild(card);
+                        });
+                        DOM.elements.detailsList.appendChild(grid);
+                    }
+                    this.switchView('details');
+                }
+
+                // إضافة event listener لزر إضافة ملف جديد في detailsHeader
+                if (DOM.elements.detailsHeader) {
+                    DOM.elements.detailsHeader.addEventListener('click', (e) => {
+                        const addBtn = e.target.closest('#add-new-file-btn');
+                        if (addBtn) {
+                            e.preventDefault();
+                            this.showAddFileModal(addBtn.dataset.subjectId);
+                            return;
+                        }
+                        let target = e.target;
+                        while (target && target !== DOM.elements.detailsHeader) {
+                            if (target.id === 'delete-subject-btn') {
+                                this.confirmDeleteSubject(target.dataset.subjectId);
+                                break;
+                            }
+                            target = target.parentElement;
+                        }
+                    });
+                }
                 DOM.elements.detailsHeader?.addEventListener('click', (e) => {
                     let target = e.target;
                     while (target && target !== DOM.elements.detailsHeader) {
@@ -1210,8 +1504,10 @@
                     if (auth.currentUser) {
                         DOM.elements.detailsHeader.innerHTML = `
                             <div class="flex flex-wrap gap-4">
-                                <button data-subject-id="${subject.id}" id="add-new-file-btn"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow-md transition duration-300 flex items-center space-x-2 space-x-reverse">
+                                <button type="button"
+                                    id="add-new-file-btn"
+                                    data-subject-id="${subject.id}"
+                                    class="flex items-center space-x-2 space-x-reverse bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg shadow transition duration-200">
                                     <i class="fas fa-plus"></i>
                                     <span>إضافة ملف جديد</span>
                                 </button>
@@ -1314,12 +1610,17 @@
             }
 
             renderSubjects() {
+
                 if (!DOM.elements.subjectsContainer || !DOM.elements.loadingSpinner) return;
                 DOM.elements.loadingSpinner.classList.add('hidden');
                 DOM.elements.subjectsContainer.innerHTML = '';
                 let filteredSubjects = appState.allSubjects;
+                // Apply stage filter if selected
+                if (window.appState && window.appState.selectedStage && window.appState.selectedStage !== "") {
+                    filteredSubjects = filteredSubjects.filter(s => String(s.stage) === String(window.appState.selectedStage));
+                }
                 if (appState.searchQuery) {
-                    filteredSubjects = appState.allSubjects.filter(s =>
+                    filteredSubjects = filteredSubjects.filter(s =>
                         s.name.toLowerCase().includes(appState.searchQuery) ||
                         (s.description && s.description.toLowerCase().includes(appState.searchQuery))
                     );
@@ -1343,71 +1644,17 @@
                     const stageEl = document.createElement('div');
                     stageEl.className = "card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-fadeIn";
                     const stageName = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة'][stage - 1];
-                    stageEl.innerHTML = `
-                        <h2 class="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400 border-b pb-2 dark:border-gray-700">
-                            المرحلة ${stageName}
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            ${this.renderCourse(stage, 1, stageData[1])}
-                            ${this.renderCourse(stage, 2, stageData[2])}
-                        </div>
-                    `;
+                    stageEl.innerHTML = [
+                        `<h2 class="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400 border-b pb-2 dark:border-gray-700">`,
+                        `    المرحلة ${stageName}`,
+                        `</h2>`,
+                        `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">`,
+                        this.renderCourse(stage, 1, stageData[1]),
+                        this.renderCourse(stage, 2, stageData[2]),
+                        `</div>`
+                    ].join('\n');
                     DOM.elements.subjectsContainer.appendChild(stageEl);
                 }
-            }
-
-            renderCourse(stage, course, subjects) {
-                if (subjects.length === 0) return '';
-                const sortedSubjects = [...subjects].sort((a, b) => a.name.localeCompare(b.name));
-                const courseName = course === 1 ? 'الأول' : 'الثاني';
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                const subjectsHtml = sortedSubjects.map(subject => {
-                    const isNew = subject.lastUpdatedAt && subject.lastUpdatedAt.toDate() > oneWeekAgo;
-                    const fileCount = subject.files?.length || 0;
-                    return `
-                        <div class="card bg-gray-50 dark:bg-gray-700 p-4 rounded-lg hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-2">
-                                <a href="#" data-id="${subject.id}"
-                                   class="subject-folder-link font-medium text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400">
-                                    ${subject.name}
-                                </a>
-                                ${isNew ? `
-                                <span class="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                    جديد
-                                </span>
-                                ` : ''}
-                            </div>
-                            ${subject.description ? `
-                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                                ${subject.description}
-                            </p>
-                            ` : ''}
-                            <div class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
-                                <span>
-                                    <i class="fas fa-file-alt mr-1"></i>
-                                    ${fileCount} ملف
-                                </span>
-                                ${subject.lastUpdatedAt ? `
-                                <span>
-                                    <i class="fas fa-clock mr-1"></i>
-                                    ${this.formatDate(subject.lastUpdatedAt)}
-                                </span>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                return `
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
-                            الكورس ${courseName}
-                        </h3>
-                        <div class="space-y-3">
-                            ${subjectsHtml}
-                        </div>
-                    </div>
-                `;
             }
 
             renderAnnouncements() {
@@ -1454,6 +1701,30 @@
                         DOM.elements.adminAnnouncementsList.appendChild(adminAnnouncementEl);
                     }
                 });
+            }
+
+            // Add this method to fix the error in renderSubjects
+            renderCourse(stage, course, subjects) {
+                if (!subjects || subjects.length === 0) return '';
+                const courseName = course === 1 ? 'الكورس الأول' : 'الكورس الثاني';
+                return `
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2 text-indigo-700 dark:text-indigo-300">${courseName}</h3>
+                        <ul class="space-y-3">
+                            ${subjects.map(subject => `
+                                <li class="flex items-center justify-between p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 group animate-fadeIn">
+                                    <div>
+                                        <span class="font-medium text-blue-700 dark:text-blue-300">${subject.name}</span>
+                                        ${subject.description ? `<span class="text-xs text-gray-500 dark:text-gray-400 ml-2">${subject.description}</span>` : ''}
+                                    </div>
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center subject-folder-link" data-id="${subject.id}">
+                                        <i class="fas fa-folder-open mr-1"></i> عرض
+                                    </button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
             }
 
             renderUsers() {
@@ -1746,7 +2017,7 @@
                         fileName: fileName,
                         fileUrl: fileUrl,
                         fileType: fileType,
-                        addedAt: serverTimestamp(),
+                        addedAt: Date.now(), // Use client-side timestamp here
                         addedBy: auth.currentUser.uid
                     };
                     const subjectRef = doc(db, "subjects", subjectId);
