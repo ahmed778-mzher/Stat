@@ -677,67 +677,7 @@
         </div>
     </div>
 
-    <style>
-    @keyframes fadeInScale {
-        0% {
-        opacity: 0;
-        transform: scale(0.8);
-        }
-        100% {
-        opacity: 1;
-        transform: scale(1);
-        }
-    }
-
-    #customAlert {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-    #customAlertContent {
-        background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        max-width: 500px;
-        text-align: center;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-        animation: fadeInScale 0.4s ease-out;
-    }
-
-    #customAlert button {
-        margin-top: 15px;
-        padding: 8px 16px;
-        background-color: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    #customAlert button:hover {
-        background-color: #1e40af;
-    }
-    </style>
-
-    <div id="customAlert">
-    <div id="customAlertContent">
-        <h3 style="color: #b91c1c; font-size: 1.2rem;">🔔 تنويه هام</h3>
-        <p style="margin-top: 10px; font-size: 1rem;">
-        تُعد هذه المنصة مبادرة طلابية فردية، ولا تمت بأي صلة رسمية إلى الجامعة أو الكلية.
-        تم تطويرها بجهود شخصية من قبل Ahmed S.Jabbar   بهدف دعم الطلاب وتسهيل الوصول إلى المواد والخدمات التعليمية.
-        </p>
-        <button onclick="document.getElementById('customAlert').style.display='none'">
-        موافق
-        </button>
-    </div>
-    </div>
+    
 
     <div id="lightbox-modal" class="modal-overlay" onclick="closeLightbox()">
         <button class="close-btn" onclick="closeLightbox()">&times;</button>
@@ -1049,69 +989,69 @@
 
         async function renderAdminView(container) {
             container.innerHTML = `
-                <div class="admin-header">
-                    <h2><i class="fas fa-cogs"></i> لوحة التحكم</h2>
-                    <button id="logout-btn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
-                </div>
-                <div class="admin-tabs">
-                    <button class="tab-link active" data-tab="materials-tab">إدارة المواد</button>
-                    ${userRole === 'superadmin' ? `
-                        <button class="tab-link" data-tab="admins-tab">إدارة المسؤولين</button>
-                        <button class="tab-link" data-tab="stats-tab">الإحصائيات</button>
-                    ` : ''}
-                    <button class="tab-link" data-tab="profile-tab">الصفحة الشخصية</button>
-                </div>
-                <div id="materials-tab" class="tab-content active"></div>
-                <div id="admins-tab" class="tab-content"></div>
-                <div id="stats-tab" class="tab-content"></div>
-                <div id="profile-tab" class="tab-content"></div>
+            <div class="admin-header">
+                <h2><i class="fas fa-cogs"></i> لوحة التحكم</h2>
+                <button id="logout-btn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+            </div>
+            <div class="admin-tabs" style="flex-wrap:wrap;">
+                <button class="tab-link active" data-tab="materials-tab">إدارة المواد</button>
+                ${userRole === 'superadmin' ? `
+                <button class="tab-link" data-tab="admins-tab">إدارة المسؤولين</button>
+                <button class="tab-link" data-tab="stats-tab">الإحصائيات</button>
+                ` : ''}
+                <button class="tab-link" data-tab="profile-tab">الصفحة الشخصية</button>
+            </div>
+            <div id="materials-tab" class="tab-content active"></div>
+            <div id="admins-tab" class="tab-content"></div>
+            <div id="stats-tab" class="tab-content"></div>
+            <div id="profile-tab" class="tab-content"></div>
             `;
             
             renderMaterialsManagementTab(document.getElementById('materials-tab'));
             renderProfileTab(document.getElementById('profile-tab'));
             if (userRole === 'superadmin') {
-                renderAdminsManagementTab(document.getElementById('admins-tab'));
-                renderStatsTab(document.getElementById('stats-tab'));
+            renderAdminsManagementTab(document.getElementById('admins-tab'));
+            renderStatsTab(document.getElementById('stats-tab'));
             }
 
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
             container.querySelectorAll('.tab-link').forEach(button => {
-                button.addEventListener('click', () => {
-                    container.querySelectorAll('.tab-link, .tab-content').forEach(el => el.classList.remove('active'));
-                    button.classList.add('active');
-                    document.getElementById(button.dataset.tab).classList.add('active');
-                });
+            button.addEventListener('click', () => {
+                container.querySelectorAll('.tab-link, .tab-content').forEach(el => el.classList.remove('active'));
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
             });
         }
 
         // --- Admin Tab Renderers ---
         async function renderMaterialsManagementTab(container) {
             container.innerHTML = `
-                <div class="admin-grid">
-                    <div class="form-column">
-                        <section class="admin-section">
-                            <h2 id="material-form-title"><i class="fas fa-plus-circle"></i> إضافة مادة جديدة</h2>
-                            <form id="material-form">
-                                <input type="hidden" id="material-id">
-                                <select id="stage-select" required><option value="">اختر المرحلة...</option><option value="1">الأولى</option><option value="2">الثانية</option><option value="3">الثالثة</option><option value="4">الرابعة</option></select>
-                                <select id="course-select" required><option value="">اختر الكورس...</option><option value="1">الأول</option><option value="2">الثاني</option></select>
-                                <input type="text" id="material-name" placeholder="اسم المادة" required>
-                                <input type="text" id="prof-name" placeholder="اسم الأستاذ/الدكتور" required>
-                                <label for="material-pdf-url">رابط ملف المادة (PDF):</label>
-                                <input type="url" id="material-pdf-url" placeholder="https://example.com/file.pdf">
-                                <label for="image-urls" style="margin-top: 1rem; display: block;">روابط الصور (كل رابط في سطر):</label>
-                                <textarea id="image-urls" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.png" rows="4"></textarea>
-                                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;"><i class="fas fa-save"></i> حفظ المادة</button>
-                            </form>
-                        </section>
-                    </div>
-                    <div class="list-column">
-                        <section class="admin-section">
-                            <h2><i class="fas fa-list-alt"></i> المواد الحالية</h2>
-                            <div id="materials-management-list"></div>
-                        </section>
-                    </div>
+            <div class="admin-grid" style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                <div class="form-column" style="flex:1 1 350px; min-width:280px; max-width:500px;">
+                <section class="admin-section">
+                    <h2 id="material-form-title"><i class="fas fa-plus-circle"></i> إضافة مادة جديدة</h2>
+                    <form id="material-form">
+                    <input type="hidden" id="material-id">
+                    <select id="stage-select" required><option value="">اختر المرحلة...</option><option value="1">الأولى</option><option value="2">الثانية</option><option value="3">الثالثة</option><option value="4">الرابعة</option></select>
+                    <select id="course-select" required><option value="">اختر الكورس...</option><option value="1">الأول</option><option value="2">الثاني</option></select>
+                    <input type="text" id="material-name" placeholder="اسم المادة" required>
+                    <input type="text" id="prof-name" placeholder="اسم الأستاذ/الدكتور" required>
+                    <label for="material-pdf-url">رابط ملف المادة (PDF):</label>
+                    <input type="url" id="material-pdf-url" placeholder="https://example.com/file.pdf">
+                    <label for="image-urls" style="margin-top: 1rem; display: block;">روابط الصور (كل رابط في سطر):</label>
+                    <textarea id="image-urls" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.png" rows="4"></textarea>
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;"><i class="fas fa-save"></i> حفظ المادة</button>
+                    </form>
+                </section>
                 </div>
+                <div class="list-column" style="flex:2 1 400px; min-width:280px;">
+                <section class="admin-section">
+                    <h2><i class="fas fa-list-alt"></i> المواد الحالية</h2>
+                    <div id="materials-management-list"></div>
+                </section>
+                </div>
+            </div>
             `;
             document.getElementById('material-form').addEventListener('submit', handleMaterialSubmit);
             loadMaterialsForAdmin();
@@ -1119,19 +1059,19 @@
 
         async function renderAdminsManagementTab(container) {
             container.innerHTML = `
-                <section class="admin-section">
-                    <h2><i class="fas fa-user-plus"></i> إضافة مسؤول جديد</h2>
-                    <form id="add-admin-form">
-                        <label for="new-admin-uid">معرف المستخدم (User ID):</label>
-                        <input type="text" id="new-admin-uid" placeholder="أدخل User ID من لوحة تحكم Firebase" required>
-                        <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> إضافة مسؤول</button>
-                    </form>
-                    <div id="add-admin-feedback" style="margin-top:10px;"></div>
-                </section>
-                <section class="admin-section">
-                    <h2><i class="fas fa-users-cog"></i> المسؤولون الحاليون</h2>
-                    <div id="admins-management-list"></div>
-                </section>
+            <section class="admin-section">
+                <h2><i class="fas fa-user-plus"></i> إضافة مسؤول جديد</h2>
+                <form id="add-admin-form">
+                <label for="new-admin-uid">معرف المستخدم (User ID):</label>
+                <input type="text" id="new-admin-uid" placeholder="أدخل User ID من لوحة تحكم Firebase" required>
+                <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> إضافة مسؤول</button>
+                </form>
+                <div id="add-admin-feedback" style="margin-top:10px;"></div>
+            </section>
+            <section class="admin-section">
+                <h2><i class="fas fa-users-cog"></i> المسؤولون الحاليون</h2>
+                <div id="admins-management-list"></div>
+            </section>
             `;
             document.getElementById('add-admin-form').addEventListener('submit', handleAddAdmin);
             loadAdmins();
@@ -1139,30 +1079,30 @@
 
         async function renderStatsTab(container) {
             container.innerHTML = `
-                <section class="admin-section">
-                    <h2><i class="fas fa-chart-bar"></i> الإحصائيات</h2>
-                    <div id="stats-grid" class="stats-grid"></div>
-                    <h3 style="margin-top: 2rem;">تحميلات المواد</h3>
-                    <div id="material-stats"></div>
-                </section>
+            <section class="admin-section">
+                <h2><i class="fas fa-chart-bar"></i> الإحصائيات</h2>
+                <div id="stats-grid" class="stats-grid" style="display:flex;flex-wrap:wrap;gap:1rem;"></div>
+                <h3 style="margin-top: 2rem;">تحميلات المواد</h3>
+                <div id="material-stats" style="overflow-x:auto;"></div>
+            </section>
             `;
             loadStats();
         }
 
         function renderProfileTab(container) {
             container.innerHTML = `
-                <section class="admin-section">
-                    <h2><i class="fas fa-user-circle"></i> الصفحة الشخصية</h2>
-                    <form id="profile-form">
-                        <label for="profile-name">الاسم:</label>
-                        <input type="text" id="profile-name" placeholder="اسمك الذي سيظهر للجميع" value="${currentUserData?.name || ''}" required>
-                        
-                        <label for="profile-email">البريد الإلكتروني:</label>
-                        <input type="email" id="profile-email" value="${currentUser?.email || ''}" disabled>
-                        
-                        <button type="submit" class="btn"><i class="fas fa-save"></i> حفظ التغييرات</button>
-                    </form>
-                </section>
+            <section class="admin-section">
+                <h2><i class="fas fa-user-circle"></i> الصفحة الشخصية</h2>
+                <form id="profile-form">
+                <label for="profile-name">الاسم:</label>
+                <input type="text" id="profile-name" placeholder="اسمك الذي سيظهر للجميع" value="${currentUserData?.name || ''}" required>
+                
+                <label for="profile-email">البريد الإلكتروني:</label>
+                <input type="email" id="profile-email" value="${currentUser?.email || ''}" disabled>
+                
+                <button type="submit" class="btn"><i class="fas fa-save"></i> حفظ التغييرات</button>
+                </form>
+            </section>
             `;
             document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
         }
